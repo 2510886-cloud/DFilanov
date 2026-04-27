@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Герой нашего отражения — Денис Филатов</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind Config & Custom CSS -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'serif'],
+                    },
+                    colors: {
+                        paper: {
+                            50: '#fdfbf7',
+                            100: '#f6f3eb',
+                            200: '#e8e0d0',
+                            800: '#4a4231',
+                            900: '#322d21',
+                        },
+                        accent: {
+                            light: '#d4a373',
+                            DEFAULT: '#bc6c25',
+                            dark: '#606c38',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Base typography and layout */
+        body {
+            background-color: #fdfbf7;
+            color: #322d21;
+            overflow-x: hidden;
+        }
+
+        /* Chart Container Styling (Mandatory) */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+
+        /* Poetry rhythm styling */
+        .poetry-line {
+            display: block;
+            margin-bottom: 0.25rem;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeUp 0.5s forwards;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f6f3eb; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d4a373; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #bc6c25; 
+        }
+
+        /* Particle Canvas Background */
+        #hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased selection:bg-accent-light selection:text-paper-900">
+
+    <!-- Chosen Palette: Warm Neutrals (Paper/Parchment tones) with Earthy Amber/Green Accents for calm, organic harmony. -->
+    <!-- Application Structure Plan: 
+         1. Hero Section: Introduces the phenomenology of Denis, setting the existential tone with a particle canvas background.
+         2. Analytical Dashboard ("Координаты и Экономика"): Quantifies his philosophy. A radar chart maps his traits, and a bar chart visualizes his "Economy of Absolute Love" vs reality, giving structure to his naive wisdom.
+         3. Interactive Anthology ("Партитура Дыхания"): A split-pane explorer. Users select a chapter on the left to reveal context, philosophy ("Вкладыш бытия"), and the rhythmically formatted lyrics on the right. This allows non-linear exploration of his works.
+         4. Epilogue: Summarizes the impact.
+         RATIONALE: This structure separates the analytical/contextual understanding of Denis from the pure artistic consumption of his songs, allowing users to switch between logic and emotion intuitively. 
+    -->
+    <!-- Visualization & Content Choices: 
+         - Hero Canvas Animation -> Goal: Engage & set tone -> Viz: Gentle floating particles -> Justification: Represents the "living, organic glitch" and "phenomenology of purity" described in the prologue.
+         - Radar Chart (Chart.js) -> Goal: Profile analysis -> Viz: Personality Trait Radar -> Justification: Quantifies qualitative traits (Naivety, Wisdom, Labor, etc.) to show his multifaceted nature without SVGs.
+         - Bar Chart (Chart.js) -> Goal: Compare economic realities -> Viz: Horizontal Bar -> Justification: Starkly contrasts his actual 50k salary with his proposed 300k+ salaries and 14M song value, illustrating his "Holy Celebration" economy.
+         - Interactive List/DOM Text -> Goal: Explore Songs/Philosophy -> Viz: Split-pane dynamic text -> Justification: The text itself is the art. Vertical staggered rendering mimics the "rhythm of breathing" requested in the source report. 
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 top-0 bg-paper-50/90 backdrop-blur-md border-b border-paper-200">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="font-serif text-xl font-bold tracking-widest text-accent">Д.Ф.</div>
+            <div class="space-x-6 text-sm font-semibold tracking-wide">
+                <a href="#prologue" class="hover:text-accent transition-colors">Феноменология</a>
+                <a href="#analytics" class="hover:text-accent transition-colors">Экономика Любви</a>
+                <a href="#anthology" class="hover:text-accent transition-colors">Сборник</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero / Prologue -->
+    <header id="prologue" class="relative pt-32 pb-20 px-4 min-h-[80vh] flex flex-col justify-center items-center text-center overflow-hidden border-b border-paper-200">
+        <canvas id="hero-canvas"></canvas>
+        <div class="relative z-10 max-w-4xl mx-auto">
+            <div class="text-accent mb-4 text-4xl">✧</div>
+            <h1 class="text-5xl md:text-7xl font-serif font-bold mb-6 text-paper-900 leading-tight">
+                ГЕРОЙ НАШЕГО ОТРАЖЕНИЯ
+            </h1>
+            <p class="text-xl md:text-2xl font-serif italic text-paper-800 mb-10">
+                Сборник-присутствие. Тексты, ритмы и бытие Дениса Филатова.
+            </p>
+            <div class="bg-white/60 backdrop-blur-sm p-8 rounded-2xl shadow-sm border border-paper-100 text-left space-y-4 text-paper-800 leading-relaxed">
+                <p>
+                    Наш мир смертельно болен иронией и сложными концепциями. Мы выстроили многоуровневые когнитивные защиты, мы научились фильтровать речь, мы прячем уязвимость за фасадом социальной адекватности. И в этой стерильной, пластиковой реальности внезапно возникает сбой. Живой, органический сбой родом из Сарыг-Сепа.
+                </p>
+                <p>
+                    Его зовут Денис. Он грузчик, поэт, изобретатель и человек «без кожи».
+                </p>
+                <p>
+                    Денис не является тенью нашего времени — теней и так слишком много. Он — наше лучшее отражение. Его стиль мышления, это тотальное, растворенное в крови «не-суждение» — родовая черта. Он не учился позитивному мышлению на тренингах. Его доброта — это не социальный навык, это его органическая прошивка.
+                </p>
+                <p class="font-semibold text-accent-DEFAULT pt-2">
+                    Читайте эту книгу не глазами. Читайте ее легкими.
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Analytics Section -->
+    <section id="analytics" class="py-20 px-4 bg-paper-100">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-paper-900 mb-4">Анатомия Абсурда и Любви</h2>
+                <p class="max-w-2xl mx-auto text-paper-800">
+                    Этот раздел переводит феномен Дениса на язык цифр и метрик. Здесь мы анализируем его внутренние координаты и абсурдную, но глубоко человечную экономическую модель, где труд грузчика сакрализуется, а деньги становятся инструментом абсолютной щедрости.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <!-- Radar Chart -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-paper-200">
+                    <h3 class="text-xl font-bold mb-2 text-center">Координаты Личности</h3>
+                    <p class="text-sm text-center text-gray-500 mb-6">Баланс качеств человека «без кожи»</p>
+                    <div class="chart-container">
+                        <canvas id="personalityChart"></canvas>
+                    </div>
+                    <p class="text-sm mt-4 text-paper-800 text-center italic">
+                        Его "Святая Неадекватность" и "Наивность" на деле являются высшими формами "Мудрости" и "Сталкинга" (взлома социальных масок).
+                    </p>
+                </div>
+
+                <!-- Bar Chart -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-paper-200">
+                    <h3 class="text-xl font-bold mb-2 text-center">Экономика Абсолютной Любви</h3>
+                    <p class="text-sm text-center text-gray-500 mb-6">Текущая реальность vs. Манифест Минфину</p>
+                    <div class="chart-container">
+                        <canvas id="economyChart"></canvas>
+                    </div>
+                    <p class="text-sm mt-4 text-paper-800 text-center italic">
+                        «Когда он просит Минфин раздать всем по 300 тысяч рублей... в этом больше первобытной экономической истины, чем в трактатах академиков.»
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Anthology Section -->
+    <section id="anthology" class="py-20 px-4 bg-paper-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-12">
+                <h2 class="text-3xl md:text-5xl font-serif font-bold text-paper-900 mb-4">Партитура Дыхания</h2>
+                <p class="max-w-3xl text-paper-800 text-lg">
+                    Выберите главу, чтобы погрузиться в мир Дениса. Тексты песен отформатированы не как стихи, а как ритм его шагов и дыхания. Каждая точка и запятая — это смысловой обрыв, заставляющий читать по вертикали.
+                </p>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Navigation Sidebar -->
+                <div class="lg:w-1/3 flex flex-col space-y-3" id="chapter-list">
+                    <!-- Populated by JS -->
+                </div>
+
+                <!-- Content Display Area -->
+                <div class="lg:w-2/3 bg-white p-8 md:p-12 rounded-2xl shadow-lg border border-paper-200 relative min-h-[600px]">
+                    <div id="content-display" class="transition-opacity duration-500">
+                        <!-- Default state -->
+                        <div class="flex flex-col items-center justify-center h-full text-paper-800/50 space-y-4 py-20">
+                            <div class="text-6xl">📖</div>
+                            <p class="text-xl font-serif italic">Выберите главу слева для чтения...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Epilogue -->
+    <footer class="bg-paper-900 text-paper-100 py-16 px-4">
+        <div class="max-w-4xl mx-auto text-center space-y-6">
+            <div class="text-4xl text-accent-light mb-6">✺</div>
+            <h2 class="text-3xl font-serif font-bold">Зачем нам такие люди</h2>
+            <p class="text-lg leading-relaxed text-paper-200">
+                Мы привыкли искать мудрость в сложных книгах и молчании гуру на вершинах гор. А она ходит рядом с нами, в разорванных кроссовках, пьет «Тархун», стирает руки на погрузке мебели и просит у мироздания (в лице Минфина) только одного — чтобы всем было хорошо. Сразу, прямо сейчас, без сложных схем.
+            </p>
+            <p class="text-lg leading-relaxed text-paper-200">
+                Такие люди, как Денис, забирают на себя абсурд нашего серьезного мира, взамен отдавая чистую, детскую радость бытия. Они — якоря, удерживающие эту планету от падения в пропасть цинизма.
+            </p>
+            <div class="pt-8 border-t border-paper-800 mt-8">
+                <p class="font-serif italic text-accent-light">Да пребудет с нами счастье.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Core Logic & Data -->
+    <script>
+        // Data Storage
+        const anthologyData = [
+            {
+                id: 'ch1',
+                chapterTitle: 'Глава I. Свобода от сложных форм',
+                quote: '«Я взял маркер, черный маркер, и нарисовал на этом битом стекле цветок. И теперь трещины не видно... Я изменил информацию о разбитых стеклах»',
+                philosophy: 'Смотрите, вот эта футболка грузчика... она вообще просто на солнце пережженная, стоит 10 000 рублей в музее. Покупайте, у кого есть деньги, просто чтобы повесить где-то у себя и знать, что это футболка грузчика. Это мощные рекорды, это задачи государственной важности. Кроссовки тоже такие же... им капец пришел — тоже 10 000 рублей. Шапочка грузчика, гитариста, поэта, я и зимой и летом в ней... она будет стоить 3 миллиона рублей. Я в своем музее выставлю вот это всё, и через 100 лет люди удивятся, как мы это государство всё строили, и планету вообще-то всю...',
+                songTitle: 'Жизнь зовёт',
+                bandInfo: '(Группа рок-смена «Сегодняшний день»)',
+                sections: [
+                    {
+                        type: 'Куплет 1',
+                        lines: ['Делай свой ритм — верь.', 'Продумывай свой план — верь.', 'Достигни своего мастерства — верь.', 'Созидай своё — верь.']
+                    },
+                    {
+                        type: 'Куплет 2',
+                        lines: ['Выдавай свой пыл — верь.', 'Перепрограммируй мир — верь.', 'Перепрограммируй себя — верь.', 'Тёмные тучи пройдут,', 'как белые облака пробегут —', 'Всё одно.', 'Так или так.']
+                    },
+                    {
+                        type: 'Припев',
+                        lines: ['Действуй,', 'действуй — на шаг впереди духом.', 'На шаг впереди умом.', 'На шаг впереди телом.', 'И жизнь придет в твой дом.', 'Жизнь зовёт! Жизнь зовёт —', 'Свой полёт,', 'свой полёт!', 'В свой собственный ход —', 'Событий собственных ход.']
+                    },
+                    {
+                        type: 'Монолог-бридж',
+                        lines: ['Мальчик сказал: «Мама,', 'хорошо,', 'что солнце придумал Бог».', 'Дивно слышать такие слова от таких крох...', 'Ребёнок указал в небо.', 'Я голову поднял.', 'Я увидел просвет и сделал радостный вдох.']
+                    },
+                    {
+                        type: 'Куплет 3',
+                        lines: ['Ты посмотри в цели других людей —', 'И для своих целей созрей.', 'Пользуйся опытом тех,', 'кто достиг цели быстрей.', 'Почувствуй силы за спиной —', 'Оставайся самим собой.', 'Построй свой мир — и наш мир святой.']
+                    }
+                ]
+            },
+            {
+                id: 'ch2',
+                chapterTitle: 'Глава II. Экономика Абсолютной Любви',
+                quote: '«Если у вас отсутствуют медикаменты, можно купить изоленту за 40 рублей в «Аллее» и перемотать палец. Он заживет через день-два. Я вам советую этот ритм»',
+                philosophy: 'Министерству финансирования я скажу... Вы врубайте финансовый насос! Платятся сперва 30 тысяч рублей — это минимальная оплата труда. Но когда увеличивается производство еды, одежды, жилья — нужно увеличивать до 300 тысяч рублей ежемесячно во всех сферах деятельности. Многие скажут: "Если платить людям много, перестанут работать". Дело не в этом! Мы будем так же трудиться, нам 3 миллиона платить — без разницы, мы будем трудиться во благо... Посмотрите на реальную картину! Еда — мегатонны, одежда — мегатонны. Я 6 лет здесь, и могу взять только одну бутылочку газировки. А женщина в кафе говорит: "Никто не идет, буду закрываться". Я ей говорю: "Людям деньги нужны, тогда они прибегут и скупят у вас всё!"',
+                songTitle: 'Миру мир, Риму Рим, Москве Москва',
+                bandInfo: '',
+                sections: [
+                    {
+                        type: 'Куплет 1',
+                        lines: ['Миру мир — Риму Рим — Москве Москва.', 'Нам,', 'вам и им — обогащение родства.', 'Мы будем делать всё то,', 'что нужно всем нам:', 'Отцам,', 'матерям,', 'сыновьям,', 'дочерям.']
+                    },
+                    {
+                        type: 'Припев',
+                        lines: ['А этот наш путь даёт возможность нам знать,', 'Что можно хоть жить,', 'да хоть спать,', 'Но всё-таки правдой,', 'счастьем и знанием стать!', 'Встать и стать! Встать и стать!', 'Как стать!']
+                    },
+                    {
+                        type: 'Куплет 2',
+                        lines: ['День,', 'ночь,', 'солнце,', 'луна,', 'Огонь и вода,', 'земля и ветра.', 'Жильё,', 'еда и одежда —', 'Наш путь счастья всегда.', 'Всё даровано нам — для тебя и меня.']
+                    },
+                    {
+                        type: 'Аутро',
+                        lines: ['Я выбираю всех — во всех есть успех.', 'Я смотрю на манеж — я счастлив и свеж.']
+                    }
+                ]
+            },
+            {
+                id: 'ch3',
+                chapterTitle: 'Глава III. Святое Празднование',
+                quote: '«Я буду первым доказательством того, что и святость, и праздник могут быть вместе»',
+                philosophy: 'Я стал еще и священником подрабатывать... Ну, мы в народе, мы семья обычная, поэтому праздник-то празднуем. Водочку пьем, пиво, вино. Но послушайте зарисовку: когда я начал очень много думать о людях, днями и ночами, из года в год, чтобы создавались крепкие семьи, обогащенные, обереженные... я понял, что я похоже стал святым человеком. Выпивка горячительных напитков превратилась в трудовую деятельность. Есть труд для государства — грузить тяжести. А есть труд создания праздника и хорошего настроения для других. Я сижу дома и создаю энергию праздника для всех людей планеты Земля. Верьте мне, это медитация...',
+                songTitle: 'Улыбка мастера',
+                bandInfo: '',
+                sections: [
+                    {
+                        type: 'Куплет 1',
+                        lines: ['Однажды Иисус шёл по воде,', 'Он сказал: «Всё возможно»,', 'он исцелил людей.', 'Сказал: «Так тоже можно».', 'Однажды он воскрес и перед всеми встал,', 'Он улыбнулся и сказал: «Я всё это знал».']
+                    },
+                    {
+                        type: 'Припев',
+                        lines: ['Мастер на планете — мастер в своём свете.', 'Мастер улыбнётся — весь мир вокруг проснётся.']
+                    },
+                    {
+                        type: 'Куплет 2',
+                        lines: ['Однажды Брюс Ли пришёл и достиг скорости света,', 'Он улыбнулся и сказал: «Теперь взгляни на это.', 'Тело,', 'ум,', 'сердце могут всё.', 'Всего достигли ты и я,', 'Чтоб мир каждый день знал и верил сам в себя».']
+                    },
+                    {
+                        type: 'Куплет 3',
+                        lines: ['Однажды Виктор Цой пришёл и спел нам много песен,', 'Он показал,', 'что мир свободен,', 'мир интересен.', 'Он улыбнулся и сказал: «Верь в перемены,', 'И что реализованы все твои темы,', 'схемы».']
+                    },
+                    {
+                        type: 'Монолог',
+                        lines: ['Они каждый день сообщают нам одно и то же.', 'Они сообщают: в нас есть закон.', 'Закон гласит нам лишь об одном —', 'Что нужно просто встать...', 'и стать мастером.']
+                    }
+                ]
+            },
+            {
+                id: 'ch4',
+                chapterTitle: 'Глава IV. Десятый Вал и Птицы',
+                quote: '«Птичек всё-таки мы кормим. Семейных птичек. Голуби и воробушки — они созданы для семей, чтобы мы любовались ими»',
+                philosophy: 'Воевать противозаконно — нужно создать такой закон по всей планете. Сперва мы строим эти церкви, дома, детские сады, все трудимся. А потом говорят: "Давайте бомбанем". Бомбанули — всё развалилось. Потом нас же зовут строить заново, и все в нищете. Военным платят по 800 тысяч рублей в месяц. Вы лучше здесь платите! Грузчикам, воспитателям, водителям, продавцам, строителям по 800 тысяч рублей ежемесячно! А то вы платите за убийство людей... Это противозаконно. Герои для меня — те, кто построил вот эти дома, магазины, парки. Вот им нужно платить!',
+                songTitle: 'Десятый вал развития человечества',
+                bandInfo: '',
+                sections: [
+                    {
+                        type: 'Куплет 1',
+                        lines: ['Одежда,', 'обувь,', 'еда и напитки,', 'Театры,', 'цирки,', 'кино и открытки —', 'У меня всё есть,', 'и я есть мой путь путешествий.', 'Счастлив и волен — я всем этим вечно доволен.', 'Всем тем,', 'что мы сделали сами.', 'Здесь всё делано нами — всеми нами.']
+                    },
+                    {
+                        type: 'Припев',
+                        lines: ['Вы видите,', 'мы устроили здесь Десятый Вал!', 'Да,', 'в нём всегда штормовал мир обогащённый.', 'Вы видите,', 'мы устроили здесь Десятый Вал!', 'Да,', 'в нём всегда ритмовал мир такой влюблённый.']
+                    },
+                    {
+                        type: 'Куплет 2',
+                        lines: ['Для всех сегодня,', 'завтра,', 'вчера.', 'Для всех,', 'потому что пора! Пора быть счастливыми!', 'Пора уезжать в тайгу в наших машинах,', 'Пора уезжать к морям в наших поездах,', 'Пора взлетать в небо в наших самолётах...']
+                    },
+                    {
+                        type: 'Бридж',
+                        lines: ['Сначала иди учись к светлым богам,', 'Затем иди и обучай сам.', 'И да будет нам,', 'да будет вам —', 'Всё то,', 'что сказано нами там.', 'Будет — будто мы по волнам,', 'Или мы в облаках,', 'да и даже во снах.']
+                    }
+                ]
+            },
+            {
+                id: 'ch5',
+                chapterTitle: 'Глава V. Бесконечный запас веры',
+                quote: '«Я всегда с людьми честными да добрыми. Тогда толк есть. У меня замок на двери сломался полтора месяца назад. Дверь открытая. И всё как было, так и стоит — ничего не пропало. Честные, мощные люди»',
+                philosophy: 'Я иду на заявку по грузоперевозкам и вижу: лежит тысяча рублей. Прилипла к асфальту, где машина стояла. Я ее беру и говорю: "Ребята, чья-то тысяча, я помедитирую и отдам". Сделал заявку, прихожу — машина стоит. Ключами тыкаю — не открывается. Ладно. Утром я пошел, взял этот брелок с номерком от кабинки магазина "Батон", который валялся на остановке, прошел 150 лишних метров и отдал в магазин. Вернул! Я чемпион по возврату вещей тем, чьи это вещи...',
+                songTitle: 'Я верю в людей',
+                bandInfo: '',
+                sections: [
+                    {
+                        type: 'Куплет 1',
+                        lines: ['Я верю в людей сразу и навсегда.', 'Вера в людей для меня — живая вода.', 'Я знаю,', 'есть много хороших людей,', 'И у этих людей есть много хороших идей.']
+                    },
+                    {
+                        type: 'Припев',
+                        lines: ['И когда я вижу их — у меня создаётся стих', 'О том,', 'что я счастлив,', 'свободен и влюблён.', 'И когда я слышу их — у меня создаётся стих', 'О том,', 'что я счастлив,', 'свободен и влюблён.']
+                    },
+                    {
+                        type: 'Куплет 2',
+                        lines: ['Всякое было,', 'мне много сказали,', 'Но я верю в людей,', 'чтоб все знали:', 'Слова и чувства о людях —', 'Создают в людях уют.']
+                    }
+                ]
+            }
+        ];
+
+        // --- Interaction & State Logic ---
+        let activeChapterId = null;
+
+        function renderSidebar() {
+            const listContainer = document.getElementById('chapter-list');
+            listContainer.innerHTML = '';
+
+            anthologyData.forEach((chapter, index) => {
+                const btn = document.createElement('button');
+                btn.className = `text-left px-6 py-4 rounded-xl transition-all duration-300 border-l-4 ${activeChapterId === chapter.id ? 'bg-white shadow-md border-accent text-accent font-bold' : 'bg-transparent border-transparent text-paper-800 hover:bg-white/50'}`;
+                
+                btn.innerHTML = `
+                    <div class="text-xs tracking-widest uppercase mb-1 opacity-60">Глава ${index + 1}</div>
+                    <div class="text-lg font-serif leading-tight">${chapter.songTitle}</div>
+                `;
+
+                btn.onclick = () => selectChapter(chapter.id);
+                listContainer.appendChild(btn);
+            });
+        }
+
+        function selectChapter(id) {
+            activeChapterId = id;
+            renderSidebar();
+            
+            const contentDisplay = document.getElementById('content-display');
+            contentDisplay.style.opacity = 0;
+
+            setTimeout(() => {
+                const data = anthologyData.find(c => c.id === id);
+                if(!data) return;
+
+                let sectionsHtml = '';
+                let delayCounter = 0;
+
+                data.sections.forEach(section => {
+                    sectionsHtml += `
+                        <div class="mb-8">
+                            <div class="inline-block border border-paper-200 text-xs tracking-widest uppercase px-3 py-1 rounded-full mb-4 text-paper-800/70">
+                                ${section.type}
+                            </div>
+                            <div class="font-serif text-xl md:text-2xl leading-snug">
+                    `;
+                    
+                    section.lines.forEach(line => {
+                        sectionsHtml += `<span class="poetry-line" style="animation-delay: ${delayCounter * 0.1}s">${line}</span>`;
+                        delayCounter++;
+                    });
+
+                    sectionsHtml += `</div></div>`;
+                });
+
+                contentDisplay.innerHTML = `
+                    <div class="mb-10 pb-8 border-b border-paper-200">
+                        <blockquote class="text-lg md:text-xl font-serif italic text-accent mb-6">
+                            ${data.quote}
+                        </blockquote>
+                        <div class="bg-paper-100 p-6 rounded-xl text-paper-900 leading-relaxed text-sm md:text-base border border-paper-200">
+                            <div class="font-bold uppercase tracking-wider text-xs mb-2 opacity-50 flex items-center gap-2">
+                                <span>📄</span> Вкладыш бытия
+                            </div>
+                            ${data.philosophy}
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <h3 class="text-3xl md:text-4xl font-bold font-serif mb-2">${data.songTitle}</h3>
+                        ${data.bandInfo ? `<p class="text-sm text-paper-800/60 italic mb-10">${data.bandInfo}</p>` : '<div class="mb-10"></div>'}
+                        
+                        <div class="pl-0 md:pl-8 border-l-2 border-paper-100">
+                            ${sectionsHtml}
+                        </div>
+                    </div>
+                `;
+                contentDisplay.style.opacity = 1;
+            }, 300); // Wait for fade out
+        }
+
+
+        // --- Chart.js Implementations ---
+        function initCharts() {
+            // Radar Chart: Personality Coordinates
+            const ctxPersonality = document.getElementById('personalityChart').getContext('2d');
+            new Chart(ctxPersonality, {
+                type: 'radar',
+                data: {
+                    labels: ['Труд (Грузчик)', 'Святая Наивность', 'Поэзия / Творчество', 'Праздник Бытия', 'Бескорыстие', 'Сталкинг (взлом матрицы)'],
+                    datasets: [{
+                        label: 'Интенсивность проявления',
+                        data: [95, 100, 85, 90, 100, 80],
+                        backgroundColor: 'rgba(188, 108, 37, 0.2)', // accent-light transparent
+                        borderColor: '#bc6c25', // accent
+                        pointBackgroundColor: '#606c38',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#606c38',
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0,0,0,0.1)' },
+                            grid: { color: 'rgba(0,0,0,0.1)' },
+                            pointLabels: {
+                                font: { family: 'Inter', size: 11 },
+                                color: '#4a4231'
+                            },
+                            ticks: { display: false, min: 0, max: 100 }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Уровень: ${context.raw}% (Абсолют)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Bar Chart: Economic Reality vs Manifesto
+            const ctxEconomy = document.getElementById('economyChart').getContext('2d');
+            new Chart(ctxEconomy, {
+                type: 'bar',
+                data: {
+                    labels: ['Зарплата грузчика (сейчас)', 'Требование Минфину (база)', 'Зарплата строителям', 'Цена "рваной футболки"', 'Оценка 1 песни (с правами)'],
+                    datasets: [{
+                        label: 'Сумма в рублях (лог. шкала)',
+                        data: [50000, 300000, 800000, 1500000, 14000000],
+                        backgroundColor: [
+                            '#4a4231', // Real
+                            '#d4a373', // Manifesto
+                            '#bc6c25', 
+                            '#bc6c25',
+                            '#606c38'  // The absolute peak
+                        ],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'logarithmic',
+                            grid: { display: false },
+                            ticks: {
+                                color: '#888',
+                                callback: function(value) {
+                                    if(value === 50000 || value === 100000 || value === 1000000 || value === 10000000) {
+                                        return value >= 1000000 ? (value/1000000) + 'М' : (value/1000) + 'К';
+                                    }
+                                    return '';
+                                }
+                            }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: 'Inter', size: 11 },
+                                color: '#4a4231'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let val = context.raw;
+                                    // Fixed: Changed Intl.NumberLabel to Intl.NumberFormat
+                                    return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(val);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Canvas Background Animation ---
+        function initCanvasAnimation() {
+            const canvas = document.getElementById('hero-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            let width, height;
+            let particles = [];
+
+            function resize() {
+                width = canvas.width = canvas.offsetWidth;
+                height = canvas.height = canvas.offsetHeight;
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.size = Math.random() * 2 + 0.5;
+                    this.speedX = Math.random() * 1 - 0.5;
+                    this.speedY = Math.random() * 1 - 0.5;
+                    this.color = `rgba(188, 108, 37, ${Math.random() * 0.5})`; // accent color
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y -= this.speedY; // float up slightly
+                    
+                    if (this.size > 0.2) this.size -= 0.005;
+
+                    if (this.x > width || this.x < 0 || this.y < 0 || this.size <= 0.2) {
+                        this.x = Math.random() * width;
+                        this.y = height + 10;
+                        this.size = Math.random() * 2 + 0.5;
+                        this.speedY = Math.random() * 1;
+                    }
+                }
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function initParticles() {
+                particles = [];
+                for (let i = 0; i < 100; i++) {
+                    particles.push(new Particle());
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                requestAnimationFrame(animate);
+            }
+
+            initParticles();
+            animate();
+        }
+
+        // --- Initialize Everything ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvasAnimation();
+            initCharts();
+            renderSidebar();
+            
+            // Auto-select first chapter
+            if(anthologyData.length > 0) {
+                selectChapter(anthologyData[0].id);
+            }
+        });
+    </script>
+</body>
+</html>
